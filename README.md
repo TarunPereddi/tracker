@@ -1,36 +1,212 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Life Tracker - Personal Life Management System
 
-## Getting Started
+A comprehensive web application to track and manage your health, finances, job applications, and skill development. Built with Next.js 14, TypeScript, MongoDB, and Tailwind CSS.
 
-First, run the development server:
+## 🚀 Features
+
+### ✅ Completed
+- **Authentication**: Simple passcode-based login system
+- **Health Tracker**: Daily health logging with photo upload, supplements tracking, and mood monitoring
+- **Routine Management**: Create and manage different day types (Office, WFH, Weekend) with custom routines
+- **Dashboard**: Overview of all your metrics and progress
+- **Responsive Design**: Mobile-friendly interface
+
+### 🚧 In Development
+- **Finance Tracker**: Expense tracking, investment monitoring, and financial analytics
+- **Jobs Tracker**: Job application management and interview scheduling
+- **Skills Tracker**: Learning progress tracking and skill development
+- **Advanced Analytics**: Charts, trends, and efficiency scoring
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS, shadcn/ui
+- **Backend**: Next.js API Routes, MongoDB Atlas, Mongoose
+- **Authentication**: JWT-based with HTTP-only cookies
+- **Deployment**: Vercel (recommended)
+
+## 📋 Prerequisites
+
+- Node.js 18+ 
+- MongoDB Atlas account (free tier available)
+- Git
+
+## 🚀 Quick Start
+
+### 1. Clone and Install
+
+```bash
+git clone <your-repo-url>
+cd life-tracker
+npm install
+```
+
+### 2. Environment Setup
+
+Create a `.env.local` file in the root directory:
+
+```env
+# Database
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/life-tracker?retryWrites=true&w=majority
+
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+APP_PASSCODE=your-secure-passcode
+
+# App Configuration
+NEXT_PUBLIC_APP_NAME=Life Tracker
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### 3. MongoDB Setup
+
+1. Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
+2. Create a free account and cluster
+3. Create a database named `life-tracker`
+4. Get your connection string and update `MONGODB_URI` in `.env.local`
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. First Login
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Use the passcode you set in `APP_PASSCODE` to log in to the application.
 
-## Learn More
+## 📱 Usage
 
-To learn more about Next.js, take a look at the following resources:
+### Health Tracker
+- Log daily weight, sleep, steps, energy levels
+- Track supplements and mood
+- Upload progress photos
+- Monitor trends over time
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Routine Management
+- Create different day types (Office, WFH, Weekend, Holiday)
+- Set intended wake/sleep times and step goals
+- Define custom routine checklists
+- Track daily compliance
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Dashboard
+- View overall efficiency score
+- Quick stats for all areas
+- Recent activity and upcoming tasks
+- Progress visualization
 
-## Deploy on Vercel
+## 🗂️ Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+life-tracker/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/          # Authentication pages
+│   │   ├── (app)/           # Main application pages
+│   │   └── api/             # API routes
+│   ├── components/
+│   │   └── ui/              # shadcn/ui components
+│   └── lib/
+│       ├── schemas/         # Mongoose models
+│       ├── auth.ts          # Authentication utilities
+│       └── db.ts            # Database connection
+├── .env.example             # Environment variables template
+└── README.md
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - Login with passcode
+- `POST /api/auth/logout` - Logout
+- `GET /api/auth/verify` - Verify authentication
+
+### Health
+- `GET /api/health` - Get health logs
+- `POST /api/health` - Create/update health log
+- `GET /api/health/[date]` - Get specific health log
+- `DELETE /api/health/[date]` - Delete health log
+
+### Routine
+- `GET /api/routine/day-types` - Get day types
+- `POST /api/routine/day-types` - Create day type
+- `GET /api/routine/day-plan` - Get day plans
+- `POST /api/routine/day-plan` - Create/update day plan
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
+
+### Environment Variables for Production
+
+```env
+MONGODB_URI=your-production-mongodb-uri
+JWT_SECRET=your-production-jwt-secret
+APP_PASSCODE=your-production-passcode
+NEXT_PUBLIC_APP_NAME=Life Tracker
+NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
+```
+
+## 🔒 Security
+
+- JWT tokens stored in HTTP-only cookies
+- Passcode-based authentication (can be upgraded to OAuth later)
+- Input validation on all API endpoints
+- MongoDB connection secured with SSL
+
+## 🎯 Roadmap
+
+### Phase 1: Core Features ✅
+- [x] Authentication system
+- [x] Health tracking
+- [x] Routine management
+- [x] Basic dashboard
+
+### Phase 2: Advanced Tracking 🚧
+- [ ] Finance tracker with expense categorization
+- [ ] Job application management
+- [ ] Skills learning tracker
+- [ ] Advanced analytics and charts
+
+### Phase 3: Enhancements 📋
+- [ ] Mobile app (React Native)
+- [ ] Data export/import
+- [ ] Team/family sharing
+- [ ] AI-powered insights
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+
+1. Check the [Issues](https://github.com/your-username/life-tracker/issues) page
+2. Create a new issue with detailed information
+3. Join our community discussions
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Icons from [Lucide](https://lucide.dev/)
+- Database by [MongoDB Atlas](https://www.mongodb.com/atlas)
+
+---
+
+**Happy Tracking! 🎉**

@@ -14,9 +14,11 @@ export interface IHealthLog extends Document {
   date: string;
   weightKg?: number;
   bodyFatPct?: number;
+  muscleMassPct?: number;
   sleepHrs?: number;
   energy1to10?: number;
   steps?: number;
+  waterLiters?: number;
   workoutType?: string;
   supplements: ISupplements;
   mood?: 'Very Low' | 'Low' | 'Ok' | 'Good' | 'Great';
@@ -30,9 +32,11 @@ const HealthLogSchema = new Schema<IHealthLog>({
   date: { type: String, required: true, unique: true },
   weightKg: { type: Number },
   bodyFatPct: { type: Number },
+  muscleMassPct: { type: Number },
   sleepHrs: { type: Number },
   energy1to10: { type: Number, min: 1, max: 10 },
   steps: { type: Number },
+  waterLiters: { type: Number, min: 0, max: 10 },
   workoutType: { type: String },
   supplements: {
     multi: { type: Boolean, default: false },

@@ -45,6 +45,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Date is required' }, { status: 400 });
     }
 
+    // Check if log is being edited after the day has passed
+    const logDate = new Date(payload.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Allow editing until 1 AM next day (buffer for late entries)
+    const cutoffTime = new Date(logDate);
+    cutoffTime.setDate(cutoffTime.getDate() + 1);
+    cutoffTime.setHours(1, 0, 0, 0);
+    
+    if (new Date() > cutoffTime) {
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Cannot edit health logs after the day has passed' 
+      }, { status: 400 });
+    }
+
     // Ensure supplements object has all required fields
     const supplements = {
       multi: payload.supplements?.multi || false,
@@ -57,10 +74,11 @@ export async function POST(req: NextRequest) {
 
     const healthData = {
       ...payload,
-      supplements
+      supplements,
+      updatedAt: new Date()
     };
 
-    // Upsert health log
+    // Upsert health log (only one per day)
     const log = await HealthLog.findOneAndUpdate(
       { date: payload.date },
       { $set: healthData },
@@ -74,6 +92,77 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ 
       ok: false, 
       error: 'Failed to save health log',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    await requireAuth(req);
+    await connectDB();
+
+    const payload = await req.json();
+    console.log('Health PUT payload:', payload);
+    
+    // Validate required fields
+    if (!payload.date) {
+      return NextResponse.json({ ok: false, error: 'Date is required' }, { status: 400 });
+    }
+
+    // Check if log is being edited after the day has passed
+    const logDate = new Date(payload.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Allow editing until 1 AM next day (buffer for late entries)
+    const cutoffTime = new Date(logDate);
+    cutoffTime.setDate(cutoffTime.getDate() + 1);
+    cutoffTime.setHours(1, 0, 0, 0);
+    
+    if (new Date() > cutoffTime) {
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Cannot edit health logs after the day has passed' 
+      }, { status: 400 });
+    }
+
+    // Check if log exists
+    const existingLog = await HealthLog.findOne({ date: payload.date });
+    if (!existingLog) {
+      return NextResponse.json({ ok: false, error: 'Health log not found' }, { status: 404 });
+    }
+
+    // Ensure supplements object has all required fields
+    const supplements = {
+      multi: payload.supplements?.multi || false,
+      d3k2: payload.supplements?.d3k2 || false,
+      b12: payload.supplements?.b12 || false,
+      creatine: payload.supplements?.creatine || false,
+      fishOil: payload.supplements?.fishOil || false,
+      other: payload.supplements?.other || []
+    };
+
+    const healthData = {
+      ...payload,
+      supplements,
+      updatedAt: new Date()
+    };
+
+    // Update health log
+    const log = await HealthLog.findOneAndUpdate(
+      { date: payload.date },
+      { $set: healthData },
+      { new: true }
+    );
+
+    console.log('Health log updated:', log);
+    return NextResponse.json({ ok: true, log });
+  } catch (error) {
+    console.error('Health PUT error:', error);
+    return NextResponse.json({ 
+      ok: false, 
+      error: 'Failed to update health log',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

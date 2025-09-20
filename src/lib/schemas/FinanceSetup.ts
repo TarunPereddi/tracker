@@ -1,124 +1,78 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface ISalarySource {
+export interface IIncomeSource {
   name: string;
-  amountMonthly: number;
-  creditDay?: number;
+  amount: number;
+  creditDay: number; // Day of month when credited
 }
 
 export interface IEMI {
   name: string;
   amount: number;
-  dueDay: number;
+  debitDay: number; // Day of month when debited
   lender?: string;
 }
 
-export interface IRecurringBill {
+export interface ILivingExpense {
   name: string;
   amount: number;
-  dueDay: number;
-}
-
-export interface ICard {
-  name: string;
-  last4?: string;
-  billDueDay?: number;
-  creditLimit?: number;
+  debitDay: number; // Day of month when debited
+  category: 'rent' | 'utilities' | 'subscriptions' | 'other';
 }
 
 export interface IInvestment {
-  type: 'SIP' | 'MF' | 'Gold' | 'Stock' | 'FD' | 'PPF' | string;
   name: string;
-  amountMonthly?: number;
+  type: 'SIP' | 'MF' | 'Gold' | 'Stock' | 'FD' | 'PPF' | 'Other';
+  amount: number;
+  debitDay: number; // Day of month when paid
   currentValue?: number;
-}
-
-export interface IProperty {
-  name: string;
-  estValue?: number;
-  size?: string;
-}
-
-export interface IMoneyLent {
-  to: string;
-  amount: number;
-  expectedReturn?: string;
-}
-
-export interface IMoneyBorrowed {
-  from: string;
-  amount: number;
-  emi?: number;
-}
-
-export interface ITargets {
-  emergencyFundTarget?: number;
-  debtPriority?: string;
 }
 
 export interface IFinanceSetup extends Document {
   _id: string;
-  salarySources: ISalarySource[];
+  currentBalance: number;
+  incomeSources: IIncomeSource[];
   emis: IEMI[];
-  recurringBills: IRecurringBill[];
-  cards: ICard[];
+  livingExpenses: ILivingExpense[];
   investments: IInvestment[];
-  properties: IProperty[];
-  moneyLent: IMoneyLent[];
-  moneyBorrowed: IMoneyBorrowed[];
-  targets?: ITargets;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const FinanceSetupSchema = new Schema<IFinanceSetup>({
-  salarySources: [{
+  currentBalance: { type: Number, default: 0 },
+  incomeSources: [{
     name: { type: String, required: true },
-    amountMonthly: { type: Number, required: true },
-    creditDay: { type: Number }
+    amount: { type: Number, required: true },
+    creditDay: { type: Number, required: true, min: 1, max: 31 }
   }],
   emis: [{
     name: { type: String, required: true },
     amount: { type: Number, required: true },
-    dueDay: { type: Number, required: true },
+    debitDay: { type: Number, required: true, min: 1, max: 31 },
     lender: { type: String }
   }],
-  recurringBills: [{
+  livingExpenses: [{
     name: { type: String, required: true },
     amount: { type: Number, required: true },
-    dueDay: { type: Number, required: true }
-  }],
-  cards: [{
-    name: { type: String, required: true },
-    last4: { type: String },
-    billDueDay: { type: Number },
-    creditLimit: { type: Number }
+    debitDay: { type: Number, required: true, min: 1, max: 31 },
+    category: { 
+      type: String, 
+      required: true,
+      enum: ['rent', 'utilities', 'subscriptions', 'other']
+    }
   }],
   investments: [{
-    type: { type: String, required: true },
     name: { type: String, required: true },
-    amountMonthly: { type: Number },
+    type: { 
+      type: String, 
+      required: true,
+      enum: ['SIP', 'MF', 'Gold', 'Stock', 'FD', 'PPF', 'Other']
+    },
+    amount: { type: Number, required: true },
+    debitDay: { type: Number, required: true, min: 1, max: 31 },
     currentValue: { type: Number }
   }],
-  properties: [{
-    name: { type: String, required: true },
-    estValue: { type: Number },
-    size: { type: String }
-  }],
-  moneyLent: [{
-    to: { type: String, required: true },
-    amount: { type: Number, required: true },
-    expectedReturn: { type: String }
-  }],
-  moneyBorrowed: [{
-    from: { type: String, required: true },
-    amount: { type: Number, required: true },
-    emi: { type: Number }
-  }],
-  targets: {
-    emergencyFundTarget: { type: Number },
-    debtPriority: { type: String }
-  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

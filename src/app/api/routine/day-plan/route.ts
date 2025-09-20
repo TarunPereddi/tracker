@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import DayPlan from '@/lib/schemas/DayPlan';
+import DayType from '@/lib/schemas/DayType';
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,7 +21,12 @@ export async function GET(req: NextRequest) {
     const dayPlans = await DayPlan.find(query).sort({ date: -1 });
     return NextResponse.json({ ok: true, dayPlans });
   } catch (error) {
-    return NextResponse.json({ ok: false, error: 'Failed to fetch day plans' }, { status: 500 });
+    console.error('Day Plans GET error:', error);
+    return NextResponse.json({ 
+      ok: false, 
+      error: 'Failed to fetch day plans',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
@@ -30,9 +36,16 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const { date, dayTypeId, overrides } = await req.json();
+    console.log('Day Plan POST payload:', { date, dayTypeId, overrides });
     
     if (!date || !dayTypeId) {
       return NextResponse.json({ ok: false, error: 'Date and dayTypeId are required' }, { status: 400 });
+    }
+
+    // Verify dayTypeId exists
+    const dayType = await DayType.findById(dayTypeId);
+    if (!dayType) {
+      return NextResponse.json({ ok: false, error: 'Day type not found' }, { status: 404 });
     }
 
     const dayPlan = await DayPlan.findOneAndUpdate(
@@ -40,15 +53,21 @@ export async function POST(req: NextRequest) {
       { 
         $set: { 
           dayTypeId, 
-          overrides,
+          overrides: overrides || {},
           routineChecks: [] // Reset routine checks when changing day type
         } 
       },
       { upsert: true, new: true }
     );
 
+    console.log('Day Plan saved:', dayPlan);
     return NextResponse.json({ ok: true, dayPlan });
   } catch (error) {
-    return NextResponse.json({ ok: false, error: 'Failed to save day plan' }, { status: 500 });
+    console.error('Day Plan POST error:', error);
+    return NextResponse.json({ 
+      ok: false, 
+      error: 'Failed to save day plan',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }

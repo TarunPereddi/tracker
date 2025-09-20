@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { LoadingPage } from '@/components/ui/loading';
+import { LinesBackground } from '@/components/ui/lavender-bg';
+import { ToastContainer } from '@/components/ui/toast-container';
 import { 
   Home, 
   Heart, 
@@ -11,18 +14,20 @@ import {
   Briefcase, 
   BookOpen, 
   Calendar,
+  Target,
   LogOut,
   Menu,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Health', href: '/health', icon: Heart },
-  { name: 'Finance', href: '/finance', icon: DollarSign },
-  { name: 'Jobs', href: '/jobs', icon: Briefcase },
-  { name: 'Skills', href: '/skills', icon: BookOpen },
-  { name: 'Routine', href: '/routine', icon: Calendar },
+  { name: 'Dashboard', href: '/dashboard', icon: Home, description: 'Overview & Analytics' },
+  { name: 'Health', href: '/health', icon: Heart, description: 'Track Wellness' },
+  { name: 'Finance', href: '/finance', icon: DollarSign, description: 'Money Management' },
+  { name: 'Jobs', href: '/jobs', icon: Briefcase, description: 'Career Tracking' },
+  { name: 'Skills', href: '/skills', icon: BookOpen, description: 'Learning Progress' },
+  { name: 'Routine', href: '/routine', icon: Target, description: 'Daily Planning' },
 ];
 
 export default function AppLayout({
@@ -35,6 +40,30 @@ export default function AppLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+
+  // Close sidebar when route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
+  // Mobile menu toggle function
+  const handleMobileMenuToggle = () => {
+    setSidebarOpen(prev => !prev);
+  };
+
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [sidebarOpen]);
 
   useEffect(() => {
     checkAuth();
@@ -64,11 +93,7 @@ export default function AppLayout({
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <LoadingPage message="Initializing your life tracker..." />;
   }
 
   if (!isAuthenticated) {
@@ -77,49 +102,59 @@ export default function AppLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black relative">
+      <LinesBackground />
+      
       {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
-          <div className="flex h-16 items-center justify-between px-4">
-            <h1 className="text-xl font-semibold">Life Tracker</h1>
+      <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm" 
+          onClick={() => setSidebarOpen(false)}
+          onTouchEnd={() => setSidebarOpen(false)}
+        />
+        <div className={`fixed inset-y-0 left-0 flex w-64 flex-col bg-gray-900 border-r border-gray-800 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-2xl`}>
+          <div className="flex h-16 items-center justify-between px-4 border-b border-gray-800">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="h-5 w-5 text-purple-400" />
+              <h1 className="text-lg font-semibold text-white">LifeFlow</h1>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(false)}
+              className="text-gray-400 hover:text-white"
             >
-              <X className="h-6 w-6" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4">
+          <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  className={`flex items-center space-x-3 px-3 py-3 text-sm font-medium rounded-md transition-colors touch-manipulation ${
                     isActive
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-purple-500/20 text-purple-300 border-l-2 border-purple-500'
+                      : 'text-gray-400 hover:bg-gray-800 hover:text-white active:bg-gray-700'
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  <span>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-gray-800 p-4">
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="w-full justify-start"
+              className="w-full justify-start text-gray-400 hover:text-white border-gray-700"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Sign Out
             </Button>
           </div>
         </div>
@@ -127,9 +162,12 @@ export default function AppLayout({
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
-          <div className="flex h-16 items-center px-4">
-            <h1 className="text-xl font-semibold">Life Tracker</h1>
+        <div className="flex flex-col flex-grow bg-gray-900 border-r border-gray-800">
+          <div className="flex h-16 items-center px-4 border-b border-gray-800">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="h-5 w-5 text-purple-400" />
+              <h1 className="text-lg font-semibold text-white">LifeFlow</h1>
+            </div>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {navigation.map((item) => {
@@ -138,26 +176,26 @@ export default function AppLayout({
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  className={`flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-purple-500/20 text-purple-300 border-l-2 border-purple-500'
+                      : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                   }`}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  <span>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-gray-800 p-4">
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="w-full justify-start"
+              className="w-full justify-start text-gray-400 hover:text-white border-gray-700"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Sign Out
             </Button>
           </div>
         </div>
@@ -166,23 +204,30 @@ export default function AppLayout({
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Mobile header */}
-        <div className="lg:hidden flex h-16 items-center justify-between px-4 bg-white border-b border-gray-200">
+        <div className="lg:hidden flex h-16 items-center justify-between px-4 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-40">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setSidebarOpen(true)}
+            onClick={handleMobileMenuToggle}
+            className="text-gray-400 hover:text-white hover:bg-gray-800 p-3 touch-manipulation"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-semibold">Life Tracker</h1>
+          <div className="flex items-center space-x-2">
+            <Sparkles className="h-5 w-5 text-purple-400" />
+            <h1 className="text-lg font-semibold text-white">LifeFlow</h1>
+          </div>
           <div className="w-10" /> {/* Spacer */}
         </div>
 
         {/* Page content */}
-        <main className="flex-1">
+        <main className="flex-1 relative z-10 min-h-screen">
           {children}
         </main>
       </div>
+      
+      {/* Toast notifications */}
+      <ToastContainer />
     </div>
   );
 }

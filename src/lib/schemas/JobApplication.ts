@@ -1,64 +1,72 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IHRContact {
-  name?: string;
-  email?: string;
-  phone?: string;
-}
-
-export interface IHistoryEvent {
-  ts: Date;
-  event: string;
+export interface IInterviewLog {
+  _id: string;
+  date: string;
+  type: 'phone' | 'video' | 'in-person' | 'technical' | 'hr' | 'final';
+  interviewer?: string;
   notes?: string;
+  outcome?: 'pending' | 'passed' | 'failed' | 'rescheduled';
+  nextSteps?: string;
+  createdAt: Date;
 }
 
 export interface IJobApplication extends Document {
   _id: string;
-  dateApplied: string;
   company: string;
-  role: string;
-  location?: string;
+  position: string;
+  jobUrl?: string;
+  appliedDate: string;
+  status: 'applied' | 'screening' | 'interview' | 'offer' | 'rejected' | 'withdrawn';
+  source: 'linkedin' | 'indeed' | 'company_website' | 'referral' | 'other';
   salaryRange?: string;
-  source: 'LinkedIn' | 'Referral' | 'Portal' | 'Company Site' | 'Other';
-  hrContact?: IHRContact;
-  resumeVersion?: string;
-  status: 'Applied' | 'HR Screen' | 'Assignment' | 'Tech' | 'Manager' | 'Offer' | 'Rejected' | 'Ghosted';
-  nextFollowUp?: string;
+  location?: string;
+  jobDescription?: string;
   notes?: string;
-  history: IHistoryEvent[];
+  followUpDate?: string;
+  interviews: IInterviewLog[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const JobApplicationSchema = new Schema<IJobApplication>({
-  dateApplied: { type: String, required: true },
-  company: { type: String, required: true },
-  role: { type: String, required: true },
-  location: { type: String },
-  salaryRange: { type: String },
-  source: { 
+const InterviewLogSchema = new Schema<IInterviewLog>({
+  date: { type: String, required: true },
+  type: { 
     type: String, 
-    required: true, 
-    enum: ['LinkedIn', 'Referral', 'Portal', 'Company Site', 'Other'] 
+    required: true,
+    enum: ['phone', 'video', 'in-person', 'technical', 'hr', 'final']
   },
-  hrContact: {
-    name: { type: String },
-    email: { type: String },
-    phone: { type: String }
+  interviewer: { type: String },
+  notes: { type: String },
+  outcome: { 
+    type: String,
+    enum: ['pending', 'passed', 'failed', 'rescheduled']
   },
-  resumeVersion: { type: String },
+  nextSteps: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const JobApplicationSchema = new Schema<IJobApplication>({
+  company: { type: String, required: true },
+  position: { type: String, required: true },
+  jobUrl: { type: String },
+  appliedDate: { type: String, required: true },
   status: { 
     type: String, 
-    required: true, 
-    enum: ['Applied', 'HR Screen', 'Assignment', 'Tech', 'Manager', 'Offer', 'Rejected', 'Ghosted'] 
+    required: true,
+    enum: ['applied', 'screening', 'interview', 'offer', 'rejected', 'withdrawn']
   },
-  nextFollowUp: { type: String },
+  source: { 
+    type: String, 
+    required: true,
+    enum: ['linkedin', 'indeed', 'company_website', 'referral', 'other']
+  },
+  salaryRange: { type: String },
+  location: { type: String },
+  jobDescription: { type: String },
   notes: { type: String },
-  history: [{
-    ts: { type: Date, required: true },
-    event: { type: String, required: true },
-    notes: { type: String }
-  }],
+  followUpDate: { type: String },
+  interviews: [InterviewLogSchema],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

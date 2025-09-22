@@ -5,7 +5,7 @@ import SkillLog from '@/lib/schemas/SkillLog';
 
 export async function GET(req: NextRequest) {
   try {
-    await requireAuth(req);
+    const user = await requireAuth(req);
     await connectDB();
 
     const { searchParams } = new URL(req.url);
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const skill = searchParams.get('skill');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    let query: any = {};
+    let query: any = { userId: user.id };
     
     if (startDate && endDate) {
       query.date = { $gte: startDate, $lte: endDate };
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAuth(req);
+    const user = await requireAuth(req);
     await connectDB();
 
     const payload = await req.json();
@@ -69,6 +69,9 @@ export async function POST(req: NextRequest) {
         error: 'timeSpent must be a positive number' 
       }, { status: 400 });
     }
+
+    // Add user ID to the payload
+    payload.userId = user.id;
 
     const skill = await SkillLog.create(payload);
     console.log('Skill log created:', skill);

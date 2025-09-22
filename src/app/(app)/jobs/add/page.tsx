@@ -74,10 +74,10 @@ export default function AddJobApplicationPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <Link href="/jobs">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -85,11 +85,11 @@ export default function AddJobApplicationPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Add Job Application</h1>
-            <p className="text-gray-600">Track a new job application</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Add Job Application</h1>
+            <p className="text-muted-foreground">Track a new job application</p>
           </div>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
           <Save className="mr-2 h-4 w-4" />
           {saving ? 'Saving...' : 'Save Application'}
         </Button>

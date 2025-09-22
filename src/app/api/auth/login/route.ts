@@ -1,17 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/db';
+import User from '@/lib/schemas/User';
 import { createToken } from '@/lib/auth';
+
+function getClientIP(req: NextRequest): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIP = req.headers.get('x-real-ip');
+  return forwarded?.split(',')[0] || realIP || 'unknown';
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const { passcode } = await req.json();
+    await connectDB();
     
-    if (passcode !== process.env.APP_PASSCODE) {
-      return NextResponse.json({ ok: false, error: 'Invalid passcode' }, { status: 401 });
+    const { username, password } = await req.json();
+    
+    // Basic validation
+    if (!username || !password) {
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Username and password are required' 
+      }, { status: 400 });
     }
-
-    const token = createToken('user-1');
     
-    const response = NextResponse.json({ ok: true });
+    // Find user by username
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) {
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Invalid username or password' 
+      }, { status: 401 });
+    }
+    
+    // Check password (simple string comparison for now)
+    if (user.password !== password) {
+      return NextResponse.json({ 
+        ok: false, 
+        error: 'Invalid username or password' 
+      }, { status: 401 });
+    }
+    
+    // Update last login
+    user.lastLoginAt = new Date();
+    await user.save();
+    
+    // Create JWT token
+    const token = createToken(user._id.toString(), user.username, user.isAdmin, user.onboardingStatus);
+    
+    const response = NextResponse.json({ 
+      ok: true, 
+      user: { 
+        id: user._id, 
+        username: user.username, 
+        isAdmin: user.isAdmin,
+        onboardingStatus: user.onboardingStatus 
+      } 
+    });
+    
+    // Set cookie
     response.cookies.set('session', token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -21,6 +67,10 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    return NextResponse.json({ ok: false, error: 'Login failed' }, { status: 500 });
+    console.error('Login error:', error);
+    return NextResponse.json({ 
+      ok: false, 
+      error: 'Login failed. Please try again.' 
+    }, { status: 500 });
   }
 }

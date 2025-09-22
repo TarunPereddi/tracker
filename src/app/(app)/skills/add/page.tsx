@@ -86,10 +86,10 @@ export default function AddSkillSessionPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <Link href="/skills">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -97,11 +97,11 @@ export default function AddSkillSessionPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Add Skill Session</h1>
-            <p className="text-gray-600">Log your learning progress</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Add Skill Session</h1>
+            <p className="text-muted-foreground">Log your learning progress</p>
           </div>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
           <Save className="mr-2 h-4 w-4" />
           {saving ? 'Saving...' : 'Save Session'}
         </Button>
@@ -246,7 +246,7 @@ export default function AddSkillSessionPage() {
                 onChange={(e) => handleInputChange('tags', e.target.value)}
                 placeholder="e.g., javascript, frontend, tutorial"
               />
-              <p className="text-xs text-gray-500">Separate multiple tags with commas</p>
+              <p className="text-xs text-muted-foreground">Separate multiple tags with commas</p>
             </div>
           </CardContent>
         </Card>

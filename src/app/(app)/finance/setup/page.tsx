@@ -104,7 +104,16 @@ export default function FinanceSetupPage() {
 
       const data = await response.json();
       if (data.ok) {
+        // Update onboarding status to completed
+        await fetch('/api/user/onboarding', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'completed' }),
+        });
+        
         alert('Finance setup saved successfully!');
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
       } else {
         alert(data.error || 'Failed to save finance setup');
       }
@@ -158,12 +167,12 @@ export default function FinanceSetupPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-8 bg-muted rounded w-1/4"></div>
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              <div key={i} className="h-32 bg-muted rounded"></div>
             ))}
           </div>
         </div>
@@ -172,10 +181,10 @@ export default function FinanceSetupPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <Link href="/finance">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -183,16 +192,16 @@ export default function FinanceSetupPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Finance Setup</h1>
-            <p className="text-gray-600">Configure your monthly recurring finances</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Finance Setup</h1>
+            <p className="text-muted-foreground">Configure your monthly recurring finances</p>
           </div>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={resetSetup}>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <Button variant="outline" onClick={resetSetup} className="w-full sm:w-auto">
             <RotateCcw className="mr-2 h-4 w-4" />
             Reset Setup
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
             <Save className="mr-2 h-4 w-4" />
             {saving ? 'Saving...' : 'Save Setup'}
           </Button>
@@ -232,7 +241,7 @@ export default function FinanceSetupPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {(setup.incomeSources || []).map((source, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg">
+            <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-card">
               <div className="space-y-2">
                 <Label>Source Name</Label>
                 <Input
@@ -291,7 +300,7 @@ export default function FinanceSetupPage() {
                       }));
                     }
                   }}
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -302,7 +311,7 @@ export default function FinanceSetupPage() {
                     ...prev,
                     incomeSources: prev.incomeSources.filter((_, i) => i !== index)
                   }))}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -327,7 +336,7 @@ export default function FinanceSetupPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {(setup.emis || []).map((emi, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
+            <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-card">
               <div className="space-y-2">
                 <Label>EMI Name</Label>
                 <Input
@@ -399,7 +408,7 @@ export default function FinanceSetupPage() {
                       }));
                     }
                   }}
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -410,7 +419,7 @@ export default function FinanceSetupPage() {
                     ...prev,
                     emis: prev.emis.filter((_, i) => i !== index)
                   }))}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -435,7 +444,7 @@ export default function FinanceSetupPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {(setup.livingExpenses || []).map((expense, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
+            <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-card">
               <div className="space-y-2">
                 <Label>Expense Name</Label>
                 <Input
@@ -516,7 +525,7 @@ export default function FinanceSetupPage() {
                       }));
                     }
                   }}
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -527,7 +536,7 @@ export default function FinanceSetupPage() {
                     ...prev,
                     livingExpenses: prev.livingExpenses.filter((_, i) => i !== index)
                   }))}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -552,7 +561,7 @@ export default function FinanceSetupPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {(setup.investments || []).map((investment, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg">
+            <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg bg-card">
               <div className="space-y-2">
                 <Label>Investment Type</Label>
                 <Select
@@ -650,7 +659,7 @@ export default function FinanceSetupPage() {
                       }));
                     }
                   }}
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -661,7 +670,7 @@ export default function FinanceSetupPage() {
                     ...prev,
                     investments: prev.investments.filter((_, i) => i !== index)
                   }))}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

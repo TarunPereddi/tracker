@@ -14,7 +14,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: false }, { status: 401 });
     }
 
-    return NextResponse.json({ ok: true, user });
+    return NextResponse.json({
+      ok: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        isAdmin: user.isAdmin,
+        onboardingStatus: user.onboardingStatus || 'incomplete'
+      }
+    });
   } catch (error) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }

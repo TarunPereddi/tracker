@@ -18,7 +18,8 @@ import {
   LogOut,
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  User
 } from 'lucide-react';
 
 const navigation = [
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Jobs', href: '/jobs', icon: Briefcase, description: 'Career Tracking' },
   { name: 'Skills', href: '/skills', icon: BookOpen, description: 'Learning Progress' },
   { name: 'Routine', href: '/routine', icon: Target, description: 'Daily Planning' },
+  { name: 'Profile', href: '/profile', icon: User, description: 'Account Settings' },
 ];
 
 export default function AppLayout({
@@ -38,6 +40,7 @@ export default function AppLayout({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -74,7 +77,20 @@ export default function AppLayout({
       const response = await fetch('/api/auth/verify', {
         credentials: 'include',
       });
-      setIsAuthenticated(response.ok);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setIsAuthenticated(true);
+        
+        // Check if onboarding is incomplete or missing
+        if (!data.user.onboardingStatus || data.user.onboardingStatus !== 'completed') {
+          router.push('/onboarding');
+          return;
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
     } catch (error) {
       setIsAuthenticated(false);
     } finally {
